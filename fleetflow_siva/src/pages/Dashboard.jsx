@@ -14,7 +14,8 @@ export default function Dashboard() {
   const [activeTrips, setActiveTrips] = useState([]);
 
   useEffect(() => {
-    async function load() {
+  async function load() {
+    try {
       const v = await API.get("/vehicles");
       const d = await API.get("/drivers");
       const t = await API.get("/trips");
@@ -25,7 +26,6 @@ export default function Dashboard() {
         (x) => x.status === "available"
       ).length;
 
-      // 🔥 Maintenance count
       const maintenance = v.data.filter(
         (x) => x.status === "in_shop"
       ).length;
@@ -45,14 +45,17 @@ export default function Dashboard() {
       });
 
       setActiveTrips(dispatched);
+
+    } catch (err) {
+      console.error("Dashboard error:", err);
     }
+  }
 
-    load();
+  load();
 
-    // Auto refresh every 5 sec
-    const interval = setInterval(load, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  const interval = setInterval(load, 5000);
+  return () => clearInterval(interval);
+}, []);
 
   const Card = ({ title, value, color }) => (
     <motion.div
